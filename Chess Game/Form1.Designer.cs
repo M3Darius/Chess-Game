@@ -34,6 +34,7 @@
 			// 
 			// pictureBox1
 			// 
+			this.pictureBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(253)))), ((int)(((byte)(254)))), ((int)(((byte)(250)))));
 			this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.pictureBox1.Location = new System.Drawing.Point(0, 0);
 			this.pictureBox1.Name = "pictureBox1";

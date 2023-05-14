@@ -111,12 +111,6 @@
     <None Include="Resources\pieces_yellow.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\board_empty.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\board_empty_wooden.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\board_blue.png" />
   </ItemGroup>
   <ItemGroup>

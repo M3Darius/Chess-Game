@@ -53,7 +53,7 @@ namespace Chess_Game
 			"board_black",
 			"board_blue",
 			"board_green",
-			"board_pink",
+			"board_purple",
 			"board_wooden"
 		};
 
@@ -86,12 +86,39 @@ namespace Chess_Game
 
 		Random r = new Random();
 
+		void RandomColors()
+		{
+			int k = r.Next(BoardNames.Length);
+			Board.BoardImage = BoardSprites[k];
+
+			int a, b;
+			a = r.Next(PiecesNames.Length);
+			Board.Player1SpriteSet = PiecesNames[a];
+			do
+			{
+				b = r.Next(PiecesNames.Length);
+			} while (a == b);
+			Board.Player2SpriteSet = PiecesNames[b];
+		}
 		void SetupBoard()
 		{
-			for(int i = 0; i < InitialBoard.Length; i++)
-				for(int j = 0; j < InitialBoard[i].Length; j++)
+			float scaleFactor = 5f;
+			string boardname = BoardNames[r.Next(0, 4)];
+			Point center = new Point(pictureBox1.Width / 2, pictureBox1.Height / 2);
+
+			Board = new ChessBoard(center, scaleFactor, 0, Math.PI / 180 * 75);
+			RandomColors();
+
+
+			for (int i = 0; i < InitialBoard.Length; i++)
+				for(int j = InitialBoard[i].Length -1 ; j >= 0 ; j--)
 					if (InitialBoard[i][j] != '6')
-						Pieces.Add(new ChessPiece(i, j, (SpriteType)Int32.Parse(InitialBoard[i][j].ToString()), PiecesNames[r.Next(0, 9)], Board));
+					{
+						string owner = i <= 4 ? "Player1" : "Player2";
+						string spriteset = i <= 4 ? Board.Player1SpriteSet : Board.Player2SpriteSet;
+						ChessPiece piece = new ChessPiece(i, j, (SpriteType)Int32.Parse(InitialBoard[i][j].ToString()), Board, owner, spriteset);
+						Pieces.Add(piece);
+					}
 
 		}
 		void LoadImages()
@@ -124,16 +151,20 @@ namespace Chess_Game
 			public Tuple<int, int> PositionOnBoard;
 			ChessBoard Board;
 			public SpriteType Type;
-			public string StyleName;
+			public string SpriteSet;
 			public PointF RelativeCoords;
+			public string Owner;
+			public bool Moved;
 
-			public ChessPiece(int i, int j, SpriteType type, string styleName, ChessBoard board)
+			public ChessPiece(int i, int j, SpriteType type, ChessBoard board, string owner, string spriteSet)
 			{
 				PositionOnBoard = new Tuple<int, int>(i, j);
 				Type = type;
-				StyleName = styleName;
 				Board = board;
 				RelativeCoords = CalcRelativeCoords(Board.RotationAngle);
+				Owner = owner;
+				Moved = false;
+				SpriteSet = spriteSet;
 			}
 			public PointF CalcRelativeCoords(double theta) ///relative to center of the board
 			{
@@ -163,14 +194,16 @@ namespace Chess_Game
 			public float Width;
 			public float Height;
 			public float ScaleFactor;
+			public string Player1SpriteSet;
+			public string Player2SpriteSet;
 			
 
-			public ChessBoard(string boardImageString, Point center, float scaleFactor, double initialRotationAngle, double cameraAngle)
+			public ChessBoard(Point center, float scaleFactor, double initialRotationAngle, double cameraAngle, string boardImageString = "board_black", string p1spriteset = "pieces_white", string p2spriteset = "pieces_black")
 			{
 				ResourceManager rm = Properties.Resources.ResourceManager;
-				BoardImage = (Bitmap)rm.GetObject(boardImageString);
 				Center = center;
 				ScaleFactor = scaleFactor;
+				BoardImage = (Bitmap)rm.GetObject(boardImageString);
 
 				Width = BoardImage.Width * ScaleFactor;
 				Height = BoardImage.Height * ScaleFactor;
@@ -185,6 +218,9 @@ namespace Chess_Game
 				RotationAngle = initialRotationAngle;
 				CameraAngle = cameraAngle;
 				CosCameraAngle = Math.Cos(CameraAngle);
+				Console.WriteLine(boardImageString);
+				Player1SpriteSet = p1spriteset;
+				Player2SpriteSet = p2spriteset;
 			}
 		}
 
@@ -194,11 +230,6 @@ namespace Chess_Game
 
 			LoadImages();
 			InitializeComponent();
-
-			float scaleFactor = 5f;
-			string boardname = BoardNames[r.Next(0, 4)];
-			Point center = new Point(pictureBox1.Width/2, pictureBox1.Height/2);
-			Board = new ChessBoard(boardname, center, scaleFactor, 0, Math.PI / 3);
 			
 			SetupBoard();
 
@@ -270,7 +301,7 @@ namespace Chess_Game
 				sizex, sizey
 			);
 
-			int imgIndex = PieceSpriteIndex[cp.StyleName];
+			int imgIndex = PieceSpriteIndex[cp.SpriteSet];
 			e.Graphics.DrawImage(PieceSprites[imgIndex][((int)cp.Type)], rect);
 
 			//Pen p = new Pen(Brushes.Red, 5);
@@ -284,7 +315,7 @@ namespace Chess_Game
 			Board.RotationAngle = theta;
 			for(int i = 0; i < Pieces.Count; i++)
 			{
-				Pieces[i].RelativeCoords = Pieces[i].CalcRelativeCoords(theta);
+				Pieces[i].RelativeCoords = Pieces[i].CalcRelativeCoords(Board.RotationAngle);
 			}
 		}
 		private void pictureBox1_Paint(object sender, PaintEventArgs e)

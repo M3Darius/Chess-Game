@@ -17,4 +17,5 @@ https://brysiaa.itch.io/pixel-chess-assets-pack
 - Download Visual Studio Community Edition
 - Clone the repository
 - Open the project in VS
+- Make sure you have all the necessary packaged installed
 - Click run
